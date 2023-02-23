@@ -178,7 +178,7 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
     submitted_exit_orders["action"] = "SELL"
     submitted_exit_orders["status"] = "SUBMITTED"
     ##update price
-    submitted_exit_orders["price"] = submitted_exit_orders["price"]*(1 + alpha2)
+    submitted_exit_orders["price"] = round(submitted_exit_orders["price"]*(1 + alpha2), 2)
     print(submitted_exit_orders)
     print(ivv_prc)
     print("---------------------------------------------------------------------")
@@ -190,12 +190,26 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
             ivv_prc['Date'] == submitted_exit_orders['date'].iloc[i]
         )[0]
 
+        # 先跟当天的close price比，如果满足直接FILLED
+        if ivv_prc.iloc[idx1]["Close Price"] >= submitted_exit_orders['price'].iloc[i]:
+            exit_orders.at[i, 'status'] = 'FILLED'
+            continue
+
         ivv_slic = ivv_prc.iloc[idx1:idx1+n2]['High Price']
+
+        # # test slice
+        # test_slic = ivv_prc.iloc[idx1:idx1+n2]['Date']
+        # print("my date is:")
+        # print(submitted_exit_orders['date'].iloc[i])
+        # print("compare to date:")
+        # print(test_slic)
 
         fill_inds = ivv_slic >= submitted_exit_orders['price'].iloc[i]
         # 如果不能fill并且不够n2天则live，修改status
+        # update: 因为状态是live，修改时间为最新时间
         if(len(fill_inds) < n2) & (not any(fill_inds)):
             exit_orders.at[i, 'status'] = 'LIVE'
+            exit_orders.at[i, 'date'] = ivv_prc.iloc[-1]['Date']
         # 如果可以fill则fill，修改price为卖出的price，date为卖出的日期，status为FILLED
         elif any(fill_inds):
             # idxt = fill_inds.idxmax()
@@ -209,7 +223,15 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
             exit_orders.at[i, 'date'] = ivv_prc['Date'].iloc[idxt]
             exit_orders.at[i, 'price'] = ivv_prc['Close Price'].iloc[idxt]
             exit_orders.at[i, 'status'] = 'CLOSED'
+    # 合并submitted和live&filled
+    exit_orders = pd.concat(
+        [
+            submitted_exit_orders,
+            exit_orders
+        ]
+    ).sort_values(["date", 'trade_id'])
     print("final result----------")
     print(exit_orders)
+
 
     return entry_orders, exit_orders
