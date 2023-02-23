@@ -74,7 +74,7 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
     with np.errstate(invalid='ignore'):
         cancelled_entry_orders = submitted_entry_orders[
             np.greater(
-                ivv_prc['Low Price'].iloc[1:][::-1].rolling(3).min()[::-1].to_numpy(),
+                ivv_prc['Low Price'].iloc[1:][::-1].rolling(n1).min()[::-1].to_numpy(),
                 submitted_entry_orders['price'].to_numpy()
             )
         ].copy()
