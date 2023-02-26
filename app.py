@@ -25,7 +25,7 @@ controls = dbc.Card(
                 html.H5("Please enter start date and end date for the data which you want to query"),
                 dcc.DatePickerRange(
                     id='my-date-picker-range',
-                    min_date_allowed=datetime(2023, 1, 30),
+                    min_date_allowed=datetime(2022, 1, 1),
                     max_date_allowed=datetime.now(),
                 ),
                 # html.Br(),
@@ -127,6 +127,7 @@ app.layout = dbc.Container(
         dcc.Store(id="exit"),
     html.Div([
         html.H1("Blotter for entry and exit blotter"),
+        html.H5("[Xuting Wu(xw218), Aohua Zhang(az147)]"),
         html.Hr(),
         dbc.Row(
             [
