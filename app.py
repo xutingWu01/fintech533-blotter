@@ -25,7 +25,7 @@ controls = dbc.Card(
                 html.H5("Please enter start date and end date for the data which you want to query"),
                 dcc.DatePickerRange(
                     id='my-date-picker-range',
-                    min_date_allowed=datetime(2022, 1, 1),
+                    min_date_allowed=datetime(2021, 11, 1),
                     max_date_allowed=datetime.now(),
                 ),
                 # html.Br(),

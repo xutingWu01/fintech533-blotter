@@ -172,6 +172,9 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
 
     ##get inital submitted exit orders:
     submitted_exit_orders = filled_entry_orders.copy()
+    print("submitted_exit_orders:")
+    print(submitted_exit_orders)
+    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
     submitted_exit_orders.reset_index(drop=True, inplace=True)
     ##update the attribute
     submitted_exit_orders["trip"] = "EXIT"
@@ -195,7 +198,7 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
             exit_orders.at[i, 'status'] = 'FILLED'
             continue
 
-        ivv_slic = ivv_prc.iloc[idx1:idx1+n2]['High Price']
+        ivv_slic = ivv_prc.iloc[idx1+1:idx1+n2]['High Price']
 
         # # test slice
         # test_slic = ivv_prc.iloc[idx1:idx1+n2]['Date']
@@ -210,12 +213,12 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
         if(len(fill_inds) < n2) & (not any(fill_inds)):
             exit_orders.at[i, 'status'] = 'LIVE'
             exit_orders.at[i, 'date'] = ivv_prc.iloc[-1]['Date']
-        # 如果可以fill则fill，修改price为卖出的price，date为卖出的日期，status为FILLED
+        # 如果可以fill则fill，修改price为卖出的price(update:不修改)，date为卖出的日期，status为FILLED
         elif any(fill_inds):
             # idxt = fill_inds.idxmax()
             idxt = fill_inds.idxmax()
             exit_orders.at[i, 'date'] = ivv_prc['Date'].iloc[idxt]
-            exit_orders.at[i, 'price'] = ivv_prc['High Price'].iloc[idxt]
+            # exit_orders.at[i, 'price'] = ivv_prc['High Price'].iloc[idxt]
             exit_orders.at[i, 'status'] = 'FILLED'
         # 如果不能fill，修改price为close date的price，date为close date，status为CLOSED
         else:
@@ -229,7 +232,7 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
             submitted_exit_orders,
             exit_orders
         ]
-    ).sort_values(["date", 'trade_id'])
+    ).sort_values(['trade_id', "date"])
     print("final result----------")
     print(exit_orders)
 
