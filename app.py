@@ -109,11 +109,11 @@ tabs = html.Div([
     html.H2("Blotter"),
     dbc.Tabs(
             [
-                dbc.Tab(label="Entry", tab_id="Entry"),
-                dbc.Tab(label="Exit", tab_id="Exit"),
+                dbc.Tab(label="Blotter", tab_id="Blotter"),
+                dbc.Tab(label="Other", tab_id="Other"),
             ],
             id="tabs",
-            active_tab="Entry",
+            active_tab="Blotter",
         ),
     html.Div(id="tab-content", className="p-4"),
 ])
@@ -124,9 +124,8 @@ encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 app.layout = dbc.Container(
     [
         dcc.Store(id="entry"),
-        dcc.Store(id="exit"),
     html.Div([
-        html.H1("Blotter for entry and exit blotter"),
+        html.H1("Blotter for entry and exit orders"),
         html.H5("[Xuting Wu(xw218), Aohua Zhang(az147)]"),
         html.Hr(),
         dbc.Row(
@@ -180,31 +179,30 @@ def query_refinitiv(n_clicks, asset_id, start_date, end_date, is_open):
 # generate blotter
 @app.callback(
     Output("entry", "data"),
-    Output("exit", "data"),
     Input("submit", "n_clicks"),
     [State("alpha", "value"), State("n", "value"), State("alpha2", "value"), State("n2", "value")],
     prevent_initial_call=True
 )
 def render_blotter(n_clicks, alpha1, n1, alpha2, n2):
     print("rendering result")
-    entry_orders, exit_orders = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc)
-    return entry_orders.to_dict('records'), exit_orders.to_dict('records')
+    entry_orders = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc)
+    return entry_orders.to_dict('records')
 
 
 @app.callback(
     Output("tab-content", "children"),
-    [Input("tabs", "active_tab"), Input("entry", "data"), Input("exit", "data")],
+    [Input("tabs", "active_tab"), Input("entry", "data")],
 )
-def render_tab_content(active_tab, entry, exit):
+def render_tab_content(active_tab, entry):
     """
     This callback takes the 'active_tab' property as input, as well as the
     stored graphs, and renders the tab content depending on what the value of
     'active_tab' is.
     """
     if active_tab and entry and exit is not None:
-        if active_tab == "Entry":
+        if active_tab == "Blotter":
             return html.Div([
-                html.H2('ENTRY-BLOTTER'),
+                # html.H2('ENTRY-BLOTTER'),
                 dash_table.DataTable(
                     data = entry,
                     id="entry-blotter-tbl",
@@ -212,15 +210,15 @@ def render_tab_content(active_tab, entry, exit):
                     style_table={'height': '300px', 'overflowY': 'auto'}
                 ),
             ])
-        elif active_tab == "Exit":
+        elif active_tab == "Other":
             return html.Div([
-                html.H2('EXIT-BLOTTER'),
-                dash_table.DataTable(
-                    data = exit,
-                    id="exit-blotter-tbl",
-                    page_action='none',
-                    style_table={'height': '300px', 'overflowY': 'auto'}
-                ),
+                html.H2('Other-blotter'),
+                # dash_table.DataTable(
+                #     data = exit,
+                #     id="exit-blotter-tbl",
+                #     page_action='none',
+                #     style_table={'height': '300px', 'overflowY': 'auto'}
+                # ),
             ])
     return "No tab selected"
 

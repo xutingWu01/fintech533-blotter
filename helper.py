@@ -237,4 +237,10 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc):
     print(exit_orders)
 
 
-    return entry_orders, exit_orders
+    all_orders = pd.concat(
+        [entry_orders,
+         exit_orders]
+    ).sort_values(['trade_id', 'trip', 'date'])
+
+    return all_orders
+    #return entry_orders, exit_orders
