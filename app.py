@@ -25,7 +25,7 @@ controls = dbc.Card(
                 html.H5("Please enter start date and end date for the data which you want to query"),
                 dcc.DatePickerRange(
                     id='my-date-picker-range',
-                    min_date_allowed=datetime(2021, 11, 1),
+                    min_date_allowed=datetime(2020, 3, 1),
                     max_date_allowed=datetime.now(),
                 ),
                 # html.Br(),
@@ -110,7 +110,7 @@ tabs = html.Div([
     dbc.Tabs(
             [
                 dbc.Tab(label="Blotter", tab_id="Blotter"),
-                dbc.Tab(label="Other", tab_id="Other"),
+                dbc.Tab(label="Ledger", tab_id="Ledger"),
             ],
             id="tabs",
             active_tab="Blotter",
@@ -124,6 +124,7 @@ encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 app.layout = dbc.Container(
     [
         dcc.Store(id="entry"),
+        dcc.Store(id="ledger"),
     html.Div([
         html.H1("Blotter for entry and exit orders"),
         html.H5("[Xuting Wu(xw218), Aohua Zhang(az147)]"),
@@ -156,6 +157,7 @@ app.layout = dbc.Container(
     Output("raw-data", "data"),
     Output("query_date_div", "children"),
     Output("query_date_div", "is_open"),
+    Output('asset-id', 'value'),
     Input("query", "n_clicks"),
     [State('asset-id', 'value'), State('my-date-picker-range', 'start_date'),
      State('my-date-picker-range', 'end_date'), State("query_date_div", "is_open")],
@@ -172,28 +174,29 @@ def query_refinitiv(n_clicks, asset_id, start_date, end_date, is_open):
 
     global ivv_prc
     ivv_prc = helper.query_date(start_date_string, end_date_string, asset_id)
-    return ivv_prc.to_dict('records'), None, False
+    return ivv_prc.to_dict('records'), None, False, asset_id
 
 
 
 # generate blotter
 @app.callback(
-    Output("entry", "data"),
+    Output("entry", "data"), Output("ledger", "data"),
     Input("submit", "n_clicks"),
-    [State("alpha", "value"), State("n", "value"), State("alpha2", "value"), State("n2", "value")],
+    [State("alpha", "value"), State("n", "value"), State("alpha2", "value"), State("n2", "value"), State("asset-id", "value")],
     prevent_initial_call=True
 )
-def render_blotter(n_clicks, alpha1, n1, alpha2, n2):
+def render_blotter(n_clicks, alpha1, n1, alpha2, n2, asset_id):
     print("rendering result")
-    entry_orders = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc)
-    return entry_orders.to_dict('records')
+    entry = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc, asset_id)
+    ledger = helper.generateLedger(entry)
+    return entry.to_dict('records'), ledger.to_dict('records')
 
 
 @app.callback(
     Output("tab-content", "children"),
-    [Input("tabs", "active_tab"), Input("entry", "data")],
+    [Input("tabs", "active_tab"), Input("entry", "data"), Input("ledger", "data")],
 )
-def render_tab_content(active_tab, entry):
+def render_tab_content(active_tab, entry, ledger):
     """
     This callback takes the 'active_tab' property as input, as well as the
     stored graphs, and renders the tab content depending on what the value of
@@ -210,15 +213,15 @@ def render_tab_content(active_tab, entry):
                     style_table={'height': '300px', 'overflowY': 'auto'}
                 ),
             ])
-        elif active_tab == "Other":
+        elif active_tab == "Ledger":
             return html.Div([
                 html.H2('Other-blotter'),
-                # dash_table.DataTable(
-                #     data = exit,
-                #     id="exit-blotter-tbl",
-                #     page_action='none',
-                #     style_table={'height': '300px', 'overflowY': 'auto'}
-                # ),
+                dash_table.DataTable(
+                    data = ledger,
+                    id="ledger-tbl",
+                    page_action='none',
+                    style_table={'height': '300px', 'overflowY': 'auto'}
+                ),
             ])
     return "No tab selected"
 
