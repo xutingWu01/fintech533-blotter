@@ -226,5 +226,5 @@ def render_tab_content(active_tab, entry, ledger):
     return "No tab selected"
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
     # serve(app)

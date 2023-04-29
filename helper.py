@@ -403,6 +403,7 @@ def generateLedger(blotter):
         # print(data)
         # print("=======================")
     # print(ledger)
+    ledger.to_csv('ledger_queried.csv')
     return ledger
 
 
