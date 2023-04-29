@@ -3,41 +3,65 @@ from sklearn.linear_model import Perceptron
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
-def percep():
-    ledger = pd.read_csv('ledger_queried.csv')
+def percep(date_str = "2021-05-8"):
     # build your set of features here.
     # merge them by date to add to this dataframe.
+    ledger = pd.read_csv('ledger_queried.csv')
     features = pd.read_csv('hw4_data.csv')
-    print(features)
+    # first tranfer the date to pandas date
+    date = pd.to_datetime(date_str)
+    # get the previous business date
+    prev_date = date - pd.offsets.BDay()
+    # find the correspondent row in ledger and feature(previous day)->for model training
+    prev_date_str_ledger = prev_date.strftime("%Y-%m-%d")
+    prev_date_str_feature = prev_date.strftime("%-m/%-d/%Y")
+    row_ledger = ledger.loc[ledger['dt_enter'] == prev_date_str_ledger]
+    row_feature = features.loc[features['Dates'] == prev_date_str_feature]
 
-    # Make a training set and let's try it out on two upcoming trades.
-    # Choose a subset of data:
+    if row_ledger.empty or row_feature.empty:
+        print("didn't find the matched record from data ")
+    # slice the ledger
+    start_index_l = row_ledger.index[0] - 49
+    if start_index_l < 0:
+        print("not enough data to train the model!")
+    end_index_l = row_ledger.index[0] + 1
+    slice_ledger = ledger.iloc[start_index_l:end_index_l]
+    # slice the feature
+    start_index = row_feature.index[0] - 49
+    if start_index < 0:
+        print("not enough data to train the model!")
+    end_index = row_feature.index[0] + 1
+    slice_features = features.iloc[start_index:end_index]
+    print("-----------------------")
+    print(slice_ledger)
+    print("-----------------------")
+    print(slice_features)
+    print("-----------------------")
 
-    # df = df.drop(columns=['column_nameA', 'column_nameB'])
-    # df = df.drop(df.columns[[0, 1, 3]], axis=1)  # df.columns is zero-based pd.Index
-
-    # X = features.drop('Date', axis=1).head(50)
-    X = features.drop(features.columns[[0]], axis=1)[266:316]
-    # x_test = features.drop('Date', axis=1).iloc[[51, 52]]
-    x_test = features.drop(features.columns[[0]], axis=1).iloc[[317, 318]]
-    y = np.asarray(ledger.success.head(50), dtype="|S6")
-
+    # do the training
+    X = slice_features.drop(slice_features.columns[[0]], axis=1)
+    x_test = features.drop(features.columns[[0]], axis=1).iloc[[end_index]]
+    y = np.asarray(slice_ledger.success, dtype="|S6")
     print(X)
     print(x_test)
     print(y)
     sc = StandardScaler()
-
     sc.fit(X)
     X_std = sc.transform(X)
     X_std = sc.transform(X)
     x_test_std = sc.transform(x_test)
-
     print(X_std)
+
+    # do the prediction
     ppn = Perceptron(eta0=0.1)
     ppn.fit(X_std, y)
-
     y_pred = ppn.predict(x_test_std)
-    # predict result
-    print(y_pred)
-    # actual result
-    print(ledger.iloc[[51, 52]])
+
+    # show results
+    print("Predict trade status for the date: " + date_str + " -> " + str(y_pred))
+    print("Actual trade status for the date: " + date_str + " -> " + str(ledger.iloc[end_index_l].success))
+
+
+
+if __name__ == '__main__':
+    percep()
