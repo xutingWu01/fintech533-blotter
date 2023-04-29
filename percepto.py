@@ -37,5 +37,7 @@ def percep():
     ppn.fit(X_std, y)
 
     y_pred = ppn.predict(x_test_std)
+    # predict result
     print(y_pred)
+    # actual result
     print(ledger.iloc[[51, 52]])
