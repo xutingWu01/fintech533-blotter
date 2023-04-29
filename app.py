@@ -1,10 +1,12 @@
 from dash import Dash, html, dcc, dash_table, Input, Output, State
+import pandas as pd
 from datetime import datetime
 import plotly.express as px
 import os
 import base64
 import dash_bootstrap_components as dbc
 import helper
+import percepto
 
 
 # app = Dash(__name__)
@@ -51,6 +53,15 @@ raw_data_table = html.Div([
         ),
 ])
 
+predict_data_table = html.Div([
+    html.H2('Prediction'),
+    dash_table.DataTable(
+            id="predict-data",
+            page_action='none',
+            style_table={'height': '300px', 'overflowY': 'auto'}
+        ),
+])
+
 paramater_table = dbc.Card(
     [
         html.Div(
@@ -81,6 +92,17 @@ paramater_table = dbc.Card(
             [
                 html.Hr(),
                 dbc.Row(dbc.Button('Submit', color="primary", id='submit', n_clicks=0, className="mb-3",)),
+            ]
+        )
+    ],
+    body=True,
+)
+
+predict_btn = dbc.Card(
+    [
+        html.Div(
+            [
+                dbc.Row(dbc.Button('Start Prediction', color="primary", id='predict', n_clicks=0, className="mb-3", )),
             ]
         )
     ],
@@ -143,6 +165,14 @@ app.layout = dbc.Container(
             ],
             align="center",
         ),
+        html.Hr(),
+        dbc.Row(
+            [
+                dbc.Col(predict_btn, md=4),
+                dbc.Col(predict_data_table, md=8),
+            ],
+            align="center",
+        ),
         # dbc.Row(entry_table, md=8),
         # dbc.Row(exit_table, md=12),
     ]),
@@ -193,6 +223,23 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, asset_id):
 
 
 @app.callback(
+    Output("predict-data", "data"),
+    Input("predict", "n_clicks"),
+    prevent_initial_call=True
+)
+def render_predict(n_clicks):
+    print("predict-result")
+    predict, actual = percepto.percep()
+    predict_df = pd.DataFrame(predict)
+    # predict_df.drop(['Unnamed'])
+    print(("-----------------"))
+    print(predict_df)
+    print(("-----------------"))
+    print(actual)
+    # start process data
+    return predict.to_dict('records')
+
+@app.callback(
     Output("tab-content", "children"),
     [Input("tabs", "active_tab"), Input("entry", "data"), Input("ledger", "data")],
 )
@@ -226,5 +273,5 @@ def render_tab_content(active_tab, entry, ledger):
     return "No tab selected"
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
     # serve(app)

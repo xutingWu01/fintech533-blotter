@@ -399,7 +399,9 @@ def generateLedger(blotter):
 
         data = {"trade_id": trade_id, "asset": asset, "dt_enter": dt_enter, "dt_exit": dt_exit, "success": success,
                 "n": n, "rtn": rtn_str}
+
         ledger = ledger.append(data, ignore_index=True)
+        #ledger = pd.concat([ledger, data], ignore_index=True)
         # print(data)
         # print("=======================")
     # print(ledger)

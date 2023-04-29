@@ -41,3 +41,10 @@ def percep():
     print(y_pred)
     # actual result
     print(ledger.iloc[[51, 52]])
+    return y_pred, ledger.iloc[[51, 52]]
+
+
+
+if __name__ == '__main__':
+    percep()
+    # serve(app)
