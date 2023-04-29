@@ -1,4 +1,4 @@
-trade_id,asset,dt_enter,dt_exit,success,n,rtn
+,trade_id,asset,dt_enter,dt_exit,success,n,rtn
 0,1,IVV,2021-01-05,,0,3,
 1,2,IVV,2021-01-06,,0,3,
 2,3,IVV,2021-01-07,,0,3,
