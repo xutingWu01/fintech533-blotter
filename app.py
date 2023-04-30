@@ -58,9 +58,31 @@ predict_data_table = html.Div([
     dash_table.DataTable(
             id="predict-data",
             page_action='none',
-            style_table={'height': '300px', 'overflowY': 'auto'}
+            style_table={'height': '300px', 'overflowY': 'auto'},
+            style_cell_conditional=[
+                    {'if': {'column_id': 'Date'},
+                     'width': '10%'},
+                    {'if': {'column_id': 'Success'},
+                     'width': '10%'},
+                ]
         ),
 ])
+
+actual_data_table = html.Div([
+    html.H3('Actual Data'),
+    dash_table.DataTable(
+            id="actual-data",
+            page_action='none',
+            style_table={'height': '300px', 'overflowY': 'auto'},
+            style_cell_conditional=[
+                {'if': {'column_id': 'Date'},
+                 'width': '30%'},
+                {'if': {'column_id': 'Success'},
+                 'width': '30%'},
+            ]
+        ),
+])
+
 
 paramater_table = dbc.Card(
     [
@@ -165,11 +187,11 @@ app.layout = dbc.Container(
             ],
             align="center",
         ),
-        html.Hr(),
         dbc.Row(
             [
                 dbc.Col(predict_btn, md=4),
                 dbc.Col(predict_data_table, md=8),
+                dbc.Col(actual_data_table, md=12)
             ],
             align="center",
         ),
@@ -223,21 +245,19 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, asset_id):
 
 
 @app.callback(
-    Output("predict-data", "data"),
+    Output("predict-data", "data"), Output("actual-data", "data"),
     Input("predict", "n_clicks"),
     prevent_initial_call=True
 )
 def render_predict(n_clicks):
     print("predict-result")
     predict, actual = percepto.percep()
-    predict_df = pd.DataFrame(predict)
-    # predict_df.drop(['Unnamed'])
     print(("-----------------"))
-    print(predict_df)
+    print(predict)
     print(("-----------------"))
     print(actual)
     # start process data
-    return predict.to_dict('records')
+    return predict.to_dict('records'), actual.to_dict('records')
 
 @app.callback(
     Output("tab-content", "children"),
