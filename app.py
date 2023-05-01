@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 import os
+from datetime import date
 import base64
 import dash_bootstrap_components as dbc
 import helper
@@ -24,13 +25,13 @@ controls = dbc.Card(
         # date picker
         html.Div(
             [
-                html.H5("Please enter start date and end date for the data which you want to query"),
+                dbc.Label("Please enter start date and end date for the data which you want to query"),
                 dcc.DatePickerRange(
                     id='my-date-picker-range',
                     min_date_allowed=datetime(2020, 3, 1),
                     max_date_allowed=datetime.now(),
                 ),
-                # html.Br(),
+                html.Br(),
                 dbc.Alert(id='query_date_div', is_open=False,),
             ]
         ),
@@ -44,44 +45,56 @@ controls = dbc.Card(
     body=True,
 )
 
-raw_data_table = html.Div([
-    html.H2('RAW DATA'),
-    dash_table.DataTable(
-            id="raw-data",
-            page_action='none',
-            style_table={'height': '300px', 'overflowY': 'auto'}
-        ),
-])
+raw_data_table = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H2('RAW DATA', className="card-title"),
+            dash_table.DataTable(
+                    id="raw-data",
+                    page_action='none',
+                    style_table={'height': '225px', 'overflowY': 'auto'}
+                ),
+        ]
+    )
+)
 
-predict_data_table = html.Div([
-    html.H2('Prediction'),
-    dash_table.DataTable(
-            id="predict-data",
-            page_action='none',
-            style_table={'height': '300px', 'overflowY': 'auto'},
-            style_cell_conditional=[
-                    {'if': {'column_id': 'Date'},
-                     'width': '10%'},
-                    {'if': {'column_id': 'Success'},
-                     'width': '10%'},
-                ]
-        ),
-])
+predict_data_table = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H3('Prediction'),
+            dash_table.DataTable(
+                    id="predict-data",
+                    page_action='none',
+                    style_table={'height': '100px', 'overflowY': 'auto'},
+                    style_cell_conditional=[
+                            {'if': {'column_id': 'Date'},
+                             'width': '10%'},
+                            {'if': {'column_id': 'Success'},
+                             'width': '10%'},
+                        ]
+                ),
+        ]
+    )
+)
 
-actual_data_table = html.Div([
-    html.H3('Actual Data'),
-    dash_table.DataTable(
-            id="actual-data",
-            page_action='none',
-            style_table={'height': '300px', 'overflowY': 'auto'},
-            style_cell_conditional=[
-                {'if': {'column_id': 'Date'},
-                 'width': '30%'},
-                {'if': {'column_id': 'Success'},
-                 'width': '30%'},
-            ]
-        ),
-])
+actual_data_table = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H3('Actual Data'),
+            dash_table.DataTable(
+                    id="actual-data",
+                    page_action='none',
+                    style_table={'height': '100px', 'overflowY': 'auto'},
+                    style_cell_conditional=[
+                        {'if': {'column_id': 'Date'},
+                         'width': '30%'},
+                        {'if': {'column_id': 'Success'},
+                         'width': '30%'},
+                    ]
+                ),
+        ]
+    )
+)
 
 
 paramater_table = dbc.Card(
@@ -124,7 +137,15 @@ predict_btn = dbc.Card(
     [
         html.Div(
             [
-                dbc.Row(dbc.Button('Start Prediction', color="primary", id='predict', n_clicks=0, className="mb-3", )),
+                dbc.Label("Enter the date you would like to predict"),
+                dcc.DatePickerSingle(
+                    id='predict-date',
+                    month_format='M-D-Y-Q',
+                    placeholder='M-D-Y-Q',
+                    date=date(2021, 5, 8)
+                ),
+                html.Hr(),
+                dbc.Button('Start Prediction', color="primary", id='predict', n_clicks=0, className="mb-3", ),
             ]
         )
     ],
@@ -136,7 +157,7 @@ entry_table = html.Div([
     dash_table.DataTable(
         id="entry-blotter-tbl",
         page_action='none',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '230px', 'overflowY': 'auto'}
     ),
 ])
 
@@ -145,22 +166,26 @@ exit_table = html.Div([
     dash_table.DataTable(
         id="exit-blotter-tbl",
         page_action='none',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '230px', 'overflowY': 'auto'}
     ),
 ])
 
-tabs = html.Div([
-    html.H2("Blotter"),
-    dbc.Tabs(
-            [
-                dbc.Tab(label="Blotter", tab_id="Blotter"),
-                dbc.Tab(label="Ledger", tab_id="Ledger"),
-            ],
-            id="tabs",
-            active_tab="Blotter",
-        ),
-    html.Div(id="tab-content", className="p-4"),
-])
+tabs = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H2("Blotter"),
+            dbc.Tabs(
+                    [
+                        dbc.Tab(label="Blotter", tab_id="Blotter"),
+                        dbc.Tab(label="Ledger", tab_id="Ledger"),
+                    ],
+                    id="tabs",
+                    active_tab="Blotter",
+                ),
+            html.Div(id="tab-content", className="p-4"),
+        ]
+    )
+)
 
 image_filename = 'fig.png'
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
@@ -169,37 +194,48 @@ app.layout = dbc.Container(
     [
         dcc.Store(id="entry"),
         dcc.Store(id="ledger"),
-    html.Div([
-        html.H1("Blotter for entry and exit orders"),
-        html.H5("[Xuting Wu(xw218), Aohua Zhang(az147)]"),
-        html.Hr(),
-        dbc.Row(
-            [
-                dbc.Col(controls, md=4),
-                dbc.Col(raw_data_table, md=8),
+        # Top Banner
+        html.Div(
+            className="study-browser-banner row",
+            children=[
+                html.H2(className="h2-title", children="Plot Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
+                html.H2(className="h2-title-mobile", children="Plot Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
             ],
-            align="center",
         ),
-        dbc.Row(
-            [
-                dbc.Col(paramater_table, md=4),
-                dbc.Col(tabs, md=8),
-            ],
-            align="center",
-        ),
-        dbc.Row(
-            [
-                dbc.Col(predict_btn, md=4),
-                dbc.Col(predict_data_table, md=8),
-                dbc.Col(actual_data_table, md=12)
-            ],
-            align="center",
-        ),
-        # dbc.Row(entry_table, md=8),
-        # dbc.Row(exit_table, md=12),
-    ]),
-    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'height':'50%', 'width':'50%'}),
-    ],
+        # Body of the App
+        html.Div(
+            className="row app-body",
+            children=[
+                #user controls
+                html.Hr(),
+                dbc.Row(
+                    [
+                        dbc.Col(controls, md=4),
+                        dbc.Col(raw_data_table, md=8),
+                    ],
+                    align="center",
+                ),
+                html.Hr(),
+                dbc.Row(
+                    [
+                        dbc.Col(paramater_table, md=4),
+                        dbc.Col(tabs, md=8),
+                    ],
+                    align="center",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(predict_btn, md=4),
+                        dbc.Col(predict_data_table, md=4),
+                        dbc.Col(actual_data_table, md=4)
+                    ],
+                    align="center",
+                ),
+            # dbc.Row(entry_table, md=8),
+            # dbc.Row(exit_table, md=12),
+        ]),
+        html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'height':'50%', 'width':'50%'}),
+        ],
     fluid=True,
 )
 
@@ -247,11 +283,12 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, asset_id):
 @app.callback(
     Output("predict-data", "data"), Output("actual-data", "data"),
     Input("predict", "n_clicks"),
+    State("predict-date", "date"),
     prevent_initial_call=True
 )
-def render_predict(n_clicks):
-    print("predict-result")
-    predict, actual = percepto.percep()
+def render_predict(n_clicks, predict_date):
+    print("predict-result for" + predict_date)
+    predict, actual = percepto.percep(predict_date)
     print(("-----------------"))
     print(predict)
     print(("-----------------"))
@@ -277,17 +314,16 @@ def render_tab_content(active_tab, entry, ledger):
                     data = entry,
                     id="entry-blotter-tbl",
                     page_action='none',
-                    style_table={'height': '300px', 'overflowY': 'auto'}
+                    style_table={'height': '230px', 'overflowY': 'auto'}
                 ),
             ])
         elif active_tab == "Ledger":
             return html.Div([
-                html.H2('Other-blotter'),
                 dash_table.DataTable(
                     data = ledger,
                     id="ledger-tbl",
                     page_action='none',
-                    style_table={'height': '300px', 'overflowY': 'auto'}
+                    style_table={'height': '230px', 'overflowY': 'auto'}
                 ),
             ])
     return "No tab selected"
