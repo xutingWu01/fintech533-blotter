@@ -20,6 +20,12 @@ def percep(date_str = "2021-05-8"):
 
     if row_ledger.empty or row_feature.empty:
         print("didn't find the matched record from data ")
+        predict_data = [[date_str, "Cannot Predict"]]
+        actual_data = [[date_str, "Cannot Find Actual Data"]]
+        predict_df = pd.DataFrame(predict_data, columns=['Date', 'Success'])
+        actual_df = pd.DataFrame(actual_data, columns=['Date', 'Success'])
+        return predict_df, actual_df
+
     # slice the ledger
     start_index_l = row_ledger.index[0] - 49
     if start_index_l < 0:

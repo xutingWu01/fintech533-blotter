@@ -198,8 +198,8 @@ app.layout = dbc.Container(
         html.Div(
             className="study-browser-banner row",
             children=[
-                html.H2(className="h2-title", children="Plot Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
-                html.H2(className="h2-title-mobile", children="Plot Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
+                html.H2(className="h2-title", children="Trading Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
+                html.H2(className="h2-title-mobile", children="Trading Analysis-[Xuting Wu(xw218), Aohua Zhang(az147)]"),
             ],
         ),
         # Body of the App
@@ -275,6 +275,8 @@ def query_refinitiv(n_clicks, asset_id, start_date, end_date, is_open):
 )
 def render_blotter(n_clicks, alpha1, n1, alpha2, n2, asset_id):
     print("rendering result")
+    global entry
+    global ledger
     entry = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc, asset_id)
     ledger = helper.generateLedger(entry)
     return entry.to_dict('records'), ledger.to_dict('records')

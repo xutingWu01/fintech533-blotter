@@ -148,24 +148,24 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc, asset_id):
         ]
     ).sort_values(["date", 'trade_id'])
 
-    print("submitted_entry_orders:")
-    print(submitted_entry_orders)
+    # print("submitted_entry_orders:")
+    # print(submitted_entry_orders)
+    #
+    # print("cancelled_entry_orders:")
+    # print(cancelled_entry_orders)
+    #
+    # print("filled_entry_orders:")
+    # print(filled_entry_orders)
+    #
+    # print("live_entry_orders:")
+    # print(live_entry_orders)
+    #
+    # print("entry_orders:")
+    # print(entry_orders)
 
-    print("cancelled_entry_orders:")
-    print(cancelled_entry_orders)
-
-    print("filled_entry_orders:")
-    print(filled_entry_orders)
-
-    print("live_entry_orders:")
-    print(live_entry_orders)
-
-    print("entry_orders:")
-    print(entry_orders)
 
 
-
-    print("---------------------------------------------------")
+    #print("---------------------------------------------------")
     # for exit orders
     ##Parameters:
     # alpha2 = 0.01
