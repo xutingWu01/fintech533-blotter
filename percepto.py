@@ -15,6 +15,7 @@ def whole_percep(n3):
         ledger.loc[n, 'predict_success'] = pred_str
     print(ledger)
     ledger.to_csv("predict_ledger_output.csv", index = False)
+    return ledger
 
 
 def single_percep(date_str, lookback_window, ledger, features):
