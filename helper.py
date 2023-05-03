@@ -85,7 +85,7 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc, asset_id):
         {'cancel_date': submitted_entry_orders['date'].iloc[(n1-1):].to_numpy()},
         index=submitted_entry_orders['date'].iloc[:(1-n1)].to_numpy()
     ).loc[cancelled_entry_orders['date']]['cancel_date'].to_list()
-    print(cancelled_entry_orders)
+    #print(cancelled_entry_orders)
 
     filled_entry_orders = submitted_entry_orders[
         submitted_entry_orders['trade_id'].isin(
@@ -173,9 +173,9 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc, asset_id):
 
     ##get inital submitted exit orders:
     submitted_exit_orders = filled_entry_orders.copy()
-    print("submitted_exit_orders:")
-    print(submitted_exit_orders)
-    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    # print("submitted_exit_orders:")
+    # print(submitted_exit_orders)
+    # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
     submitted_exit_orders.reset_index(drop=True, inplace=True)
     ##update the attribute
     submitted_exit_orders["trip"] = "EXIT"
@@ -183,11 +183,11 @@ def generateOrders(alpha1, n1, alpha2, n2, ivv_prc, asset_id):
     submitted_exit_orders["status"] = "SUBMITTED"
     ##update price
     submitted_exit_orders["price"] = round(submitted_exit_orders["price"]*(1 + alpha2), 2)
-    print(submitted_exit_orders)
-    print(ivv_prc)
-    print("---------------------------------------------------------------------")
-    ##get all closed  orders，如果可以fill则fill，如果不能fill并且不够n2天则live
-    print(submitted_exit_orders)
+    # print(submitted_exit_orders)
+    # print(ivv_prc)
+    # print("---------------------------------------------------------------------")
+    # ##get all closed  orders，如果可以fill则fill，如果不能fill并且不够n2天则live
+    # print(submitted_exit_orders)
     exit_orders = submitted_exit_orders.copy()
     exit_mkt_orders = pd.DataFrame(columns=exit_orders.columns)
 
@@ -400,8 +400,8 @@ def generateLedger(blotter):
         data = {"trade_id": trade_id, "asset": asset, "dt_enter": dt_enter, "dt_exit": dt_exit, "success": success,
                 "n": n, "rtn": rtn_str}
 
-        ledger = ledger.append(data, ignore_index=True)
-        #ledger = pd.concat([ledger, data], ignore_index=True)
+        # ledger = ledger.append(data, ignore_index=True)
+        ledger.loc[len(ledger)] = data
         # print(data)
         # print("=======================")
     # print(ledger)
