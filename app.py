@@ -422,7 +422,6 @@ def dumb_innerJoinRtn():
     #         else:
     #             rtn = np.log(float(exit_price) / float(enter_price)) / int(n)
     #             rtn_str = '{:.3%}'.format(rtn)
-    #     # ledger2.at[index, 'rtn'] = rtn_str
     #         data = {"dt_enter": row['dt_enter'], "dt_exit": row['dt_exit'], "rtn_benchmark": rtn_str}
     #         ivv_data.loc[len(ivv_data)] = data
 
