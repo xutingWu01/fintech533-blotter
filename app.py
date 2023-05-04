@@ -202,7 +202,7 @@ app.layout = dbc.Container(
                     ],
                     align="center",
                 ),
-            dbc.Row(dbc.Label("hoeffding is")),
+            dbc.Row(dbc.Label("", id='p')),
             dbc.Row(dbc.Alert(id='probability_div', is_open=False,))
             # dbc.Row(exit_table, md=12),
         ]),
@@ -376,7 +376,7 @@ def dumb_innerJoinRtn():
 
 @app.callback(
     Output("dumb-plot", "figure"),
-    Output("probability_div", "children"),
+    Output("p", "children"),
     [Input('dumb-range-slider', 'value'), Input("predict", "n_clicks")],
     prevent_initial_call = True
 )
@@ -409,7 +409,8 @@ def render_dumb_plot(slider_range, n_clicks):
         yaxis=dict(tickformat=".2%")
     )
     p = percepto.hoeffding_cal(helper.count_bdays(start_date_string, end_date_string), float(fit_results[0]), float(alpha_smart), alpha2_value, -0.1)
-    return fig, f"Hoeffding is {p}"
+    str1 = "Hoeffding is " + str(p)
+    return fig, str1
 
 
 @app.callback(
