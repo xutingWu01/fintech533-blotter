@@ -10,7 +10,7 @@ def whole_percep(n3):
     num_rows = len(ledger)
     ledger.insert(len(ledger.columns), "predict_success", "")
     for n in range(n3, num_rows):
-        print("deal with the row: " + str(n))
+        # print("deal with the row: " + str(n))
         date_str = ledger.iloc[n]["dt_enter"]
         pred_str = single_percep(date_str, n3, ledger, features)
         ledger.loc[n, 'predict_success'] = pred_str

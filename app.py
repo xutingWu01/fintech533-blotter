@@ -311,8 +311,9 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, n3, asset_id):
     entry = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc, asset_id)
     ledger = helper.generateLedger(entry)
     ledger2 = percepto.whole_percep(int(n3))
+    generateIVVLedger()
     # ledger2.drop('Unnamed', axis=1, inplace=True)
-    innerJoinRtn(ledger2)
+    # innerJoinRtn(ledger2)
     return entry.to_dict('records'), ledger.to_dict('records'), ledger2.to_dict('records')
 
 def innerJoinRtn(ledger2):
@@ -354,9 +355,13 @@ def innerJoinRtn(ledger2):
     prevent_initial_call = True
 )
 def render_smart_plot(slider_range, n_clicks):
-    df = pd.concat([filtered_ledger2, ivv_benchmark], axis=1, join="inner")
+    filtered_ledger2 = ledger2.query('predict_success == "1.0"')
+    df = pd.concat([filtered_ledger2, ivv_ledger], axis=1, join="inner")
     print(df)
     df = df[['rtn', 'rtn_benchmark']]
+    df = df[df['rtn'] != '']
+    df = df[df['rtn_benchmark'] != '']
+    df = df.dropna()
     for index, row in df.iterrows():
         df.at[index, 'rtn'] = float(row['rtn'].replace('%', 'e-2'))
         df.at[index, 'rtn_benchmark'] = float(row['rtn_benchmark'].replace('%', 'e-2'))
@@ -381,34 +386,47 @@ def render_smart_plot(slider_range, n_clicks):
     return(fig)
 
 
+def generateIVVLedger():
+    ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
+    global ivv_blotter
+    global ivv_ledger
+    ivv_blotter = helper.generateOrders(-0.01, 3, 0.01, 5, ivv, 'IVV')
+    ivv_ledger = helper.generateLedger(ivv_blotter)
+    ivv_ledger = ivv_ledger[['dt_enter', 'dt_exit', 'rtn']]
+    ivv_ledger.columns = ['dt_enter', 'dt_exit', 'rtn_benchmark']
+    return ivv_ledger
 
 def dumb_innerJoinRtn():
     # generate IVV rtn
     print("try inner join")
     ivv_data = pd.DataFrame(columns=['dt_enter', 'dt_exit', 'rtn_benchmark'])
-    #ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
-    ivv = entry
-    for index, row in ledger.iterrows():
-        enter_date = row['dt_enter']
-        exit_date = row['dt_exit']
-        rtn_str = ""
-        if enter_date != "" and exit_date != "":
-            enter_price_row = ivv.loc[ivv['date']==enter_date]
-            enter_price = enter_price_row.iloc[0]['price']
-            # print(enter_price)
-            exit_price_row = ivv.loc[ivv['date']==exit_date]
-            exit_price = exit_price_row.iloc[0]['price']
-            n = helper.count_bdays(enter_date, exit_date)
-            if(n==0):
-                print("n is 0")
-            else:
-                rtn = np.log(float(exit_price) / float(enter_price)) / int(n)
-                rtn_str = '{:.3%}'.format(rtn)
-        # ledger2.at[index, 'rtn'] = rtn_str
-            data = {"dt_enter": row['dt_enter'], "dt_exit": row['dt_exit'], "rtn_benchmark": rtn_str}
-            ivv_data.loc[len(ivv_data)] = data
+    ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
+    global ivv_blotter
+    ivv_blotter = helper.generateOrders(-0.01, 3, 0.01, 5, ivv, 'IVV')
+    ivv_ledger = helper.generateLedger(ivv_blotter)
+    ivv_ledger = ivv_ledger[['dt_enter', 'dt_exit', 'rtn']]
+    ivv_ledger.columns = ['dt_enter', 'dt_exit', 'rtn_benchmark']
+    # for index, row in ledger.iterrows():
+    #     enter_date = row['dt_enter']
+    #     exit_date = row['dt_exit']
+    #     rtn_str = ""
+    #     if enter_date != "" and exit_date != "":
+    #         enter_price_row = ivv_blotter.loc[ivv_blotter['date']==enter_date]
+    #         enter_price = enter_price_row.iloc[0]['price']
+    #         # print(enter_price)
+    #         exit_price_row = ivv_blotter.loc[ivv_blotter['date']==exit_date]
+    #         exit_price = exit_price_row.iloc[0]['price']
+    #         n = helper.count_bdays(enter_date, exit_date)
+    #         if(n==0):
+    #             print("n is 0")
+    #         else:
+    #             rtn = np.log(float(exit_price) / float(enter_price)) / int(n)
+    #             rtn_str = '{:.3%}'.format(rtn)
+    #     # ledger2.at[index, 'rtn'] = rtn_str
+    #         data = {"dt_enter": row['dt_enter'], "dt_exit": row['dt_exit'], "rtn_benchmark": rtn_str}
+    #         ivv_data.loc[len(ivv_data)] = data
 
-    return ivv_data
+    return ivv_ledger
 
 @app.callback(
     Output("dumb-plot", "figure"),
@@ -421,6 +439,7 @@ def render_dumb_plot(slider_range, n_clicks):
     print(df)
     df = df[['rtn', 'rtn_benchmark']]
     df = df[df['rtn'] != '']
+    df = df[df['rtn_benchmark'] != '']
     for index, row in df.iterrows():
         df.at[index, 'rtn'] = float(row['rtn'].replace('%', 'e-2'))
         df.at[index, 'rtn_benchmark'] = float(row['rtn_benchmark'].replace('%', 'e-2'))
