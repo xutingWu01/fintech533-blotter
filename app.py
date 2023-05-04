@@ -59,44 +59,6 @@ raw_data_table = dbc.Card(
         ]
     )
 )
-#
-# predict_data_table = dbc.Card(
-#     dbc.CardBody(
-#         [
-#             html.H3('Prediction'),
-#             dash_table.DataTable(
-#                     id="predict-data",
-#                     page_action='none',
-#                     style_table={'height': '100px', 'overflowY': 'auto'},
-#                     style_cell_conditional=[
-#                             {'if': {'column_id': 'Date'},
-#                              'width': '10%'},
-#                             {'if': {'column_id': 'Success'},
-#                              'width': '10%'},
-#                         ]
-#                 ),
-#         ]
-#     )
-# )
-#
-# actual_data_table = dbc.Card(
-#     dbc.CardBody(
-#         [
-#             html.H3('Actual Data'),
-#             dash_table.DataTable(
-#                     id="actual-data",
-#                     page_action='none',
-#                     style_table={'height': '100px', 'overflowY': 'auto'},
-#                     style_cell_conditional=[
-#                         {'if': {'column_id': 'Date'},
-#                          'width': '30%'},
-#                         {'if': {'column_id': 'Success'},
-#                          'width': '30%'},
-#                     ]
-#                 ),
-#         ]
-#     )
-# )
 
 
 paramater_table = dbc.Card(
@@ -129,7 +91,7 @@ paramater_table = dbc.Card(
         html.Div(
             [
                 dbc.Label("n3"),
-                dbc.Input(id='n3', type='number', value="50"),
+                dbc.Input(id='n3', type='number', value="5"),
             ]
         ),
 
@@ -143,25 +105,6 @@ paramater_table = dbc.Card(
     ],
     body=True,
 )
-
-# predict_btn = dbc.Card(
-#     [
-#         html.Div(
-#             [
-#                 dbc.Label("Enter the date you would like to predict"),
-#                 dcc.DatePickerSingle(
-#                     id='predict-date',
-#                     month_format='M-D-Y-Q',
-#                     placeholder='M-D-Y-Q',
-#                     date=date(2021, 5, 8)
-#                 ),
-#                 html.Hr(),
-#                 dbc.Button('Start Prediction', color="primary", id='predict', n_clicks=0, className="mb-3", ),
-#             ]
-#         )
-#     ],
-#     body=True,
-# )
 
 entry_table = html.Div([
     html.H2('ENTRY-BLOTTER'),
@@ -259,7 +202,8 @@ app.layout = dbc.Container(
                     ],
                     align="center",
                 ),
-            # dbc.Row(entry_table, md=8),
+            dbc.Row(dbc.Label("hoeffding is")),
+            dbc.Row(dbc.Alert(id='probability_div', is_open=False,))
             # dbc.Row(exit_table, md=12),
         ]),
         html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'height':'50%', 'width':'50%'}),
@@ -308,6 +252,8 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, n3, asset_id):
     global entry
     global ledger
     global ledger2
+    global alpha2_value
+    alpha2_value = float(alpha2)
     entry = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc, asset_id)
     ledger = helper.generateLedger(entry)
     ledger2 = percepto.whole_percep(int(n3))
@@ -374,7 +320,8 @@ def render_smart_plot(slider_range, n_clicks):
     )
 
     fit_results = px.get_trendline_results(fig).px_fit_results.iloc[0].params
-
+    global alpha_smart
+    alpha_smart = fit_results[0]
     fig.update_layout(
         title = "Alpha: " + \
                 str("{:.5%}".format(fit_results[0])) + "; Beta: " + \
@@ -429,6 +376,7 @@ def dumb_innerJoinRtn():
 
 @app.callback(
     Output("dumb-plot", "figure"),
+    Output("probability_div", "children"),
     [Input('dumb-range-slider', 'value'), Input("predict", "n_clicks")],
     prevent_initial_call = True
 )
@@ -460,25 +408,9 @@ def render_dumb_plot(slider_range, n_clicks):
         xaxis=dict(tickformat=".2%"),
         yaxis=dict(tickformat=".2%")
     )
+    p = percepto.hoeffding_cal(helper.count_bdays(start_date_string, end_date_string), float(fit_results[0]), float(alpha_smart), alpha2_value, -0.1)
+    return fig, f"Hoeffding is {p}"
 
-    return(fig)
-
-
-# @app.callback(
-#     Output("predict-data", "data"), Output("actual-data", "data"),
-#     Input("predict", "n_clicks"),
-#     State("predict-date", "date"),
-#     prevent_initial_call=True
-# )
-# def render_predict(n_clicks, predict_date):
-#     print("predict-result for" + predict_date)
-#     predict, actual = percepto.percep(predict_date)
-#     print(("-----------------"))
-#     print(predict)
-#     print(("-----------------"))
-#     print(actual)
-#     # start process data
-#     return predict.to_dict('records'), actual.to_dict('records')
 
 @app.callback(
     Output("tab-content", "children"),
