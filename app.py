@@ -386,17 +386,18 @@ def dumb_innerJoinRtn():
     # generate IVV rtn
     print("try inner join")
     ivv_data = pd.DataFrame(columns=['dt_enter', 'dt_exit', 'rtn_benchmark'])
-    ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
+    #ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
+    ivv = entry
     for index, row in ledger.iterrows():
         enter_date = row['dt_enter']
         exit_date = row['dt_exit']
         rtn_str = ""
         if enter_date != "" and exit_date != "":
-            enter_price_row = ivv.loc[ivv['Date']==enter_date]
-            enter_price = enter_price_row.iloc[0]['Close Price']
+            enter_price_row = ivv.loc[ivv['date']==enter_date]
+            enter_price = enter_price_row.iloc[0]['price']
             # print(enter_price)
-            exit_price_row = ivv.loc[ivv['Date']==exit_date]
-            exit_price = exit_price_row.iloc[0]['Close Price']
+            exit_price_row = ivv.loc[ivv['date']==exit_date]
+            exit_price = exit_price_row.iloc[0]['price']
             n = helper.count_bdays(enter_date, exit_date)
             if(n==0):
                 print("n is 0")

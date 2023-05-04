@@ -10,6 +10,7 @@ def whole_percep(n3):
     num_rows = len(ledger)
     ledger.insert(len(ledger.columns), "predict_success", "")
     for n in range(n3, num_rows):
+        print("deal with the row: " + str(n))
         date_str = ledger.iloc[n]["dt_enter"]
         pred_str = single_percep(date_str, n3, ledger, features)
         ledger.loc[n, 'predict_success'] = pred_str
@@ -79,7 +80,14 @@ def single_percep(date_str, lookback_window, ledger, features):
 
     # do the prediction
     ppn = Perceptron(eta0=0.1)
-    ppn.fit(X_std, y)
+    try:
+        ppn.fit(X_std, y)
+    except ValueError:
+        print("fitting:")
+        print(X_std)
+        print(y)
+        return ""
+
     y_pred = ppn.predict(x_test_std)
 
     # show results
@@ -91,4 +99,4 @@ def single_percep(date_str, lookback_window, ledger, features):
 
 
 if __name__ == '__main__':
-    whole_percep(50)
+    whole_percep(5)
