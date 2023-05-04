@@ -203,7 +203,7 @@ app.layout = dbc.Container(
                     align="center",
                 ),
             dbc.Row(dbc.Label("hoeffding is")),
-            dbc.Row(dbc.Alert(id='probability_div', is_open=False,))
+            dbc.Row(dbc.Alert(id='probability_div'))
             # dbc.Row(exit_table, md=12),
         ]),
         html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'height':'50%', 'width':'50%'}),
@@ -409,7 +409,9 @@ def render_dumb_plot(slider_range, n_clicks):
         yaxis=dict(tickformat=".2%")
     )
     p = percepto.hoeffding_cal(helper.count_bdays(start_date_string, end_date_string), float(fit_results[0]), float(alpha_smart), alpha2_value, -0.1)
-    return fig, f"Hoeffding is {p}"
+    retstr = "Hoeffding is " + str(p)
+    return fig, retstr
+    # return fig, f"Hoeffding is {p}"
 
 
 @app.callback(
@@ -454,5 +456,5 @@ def render_tab_content(active_tab, entry, ledger, ledger2):
     return "No tab selected"
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
     # serve(app)

@@ -101,9 +101,9 @@ def single_percep(date_str, lookback_window, ledger, features):
 # b is the stop gap, we exit the trade no matter what if it's down by 10%
 def hoeffding_cal(n, alpha_dumb, alpha_smart, a, b = -0.1):
     t = float(alpha_dumb) - float(alpha_smart)
-    result1 = math.exp(-2 * float(n) * (t ** 2))
-    result2 = (float(b) - float(a)) ** 2
-    return result1 / result2
+    result1 = (float(b) - float(a)) ** 2
+    result2 = math.exp(-2 * float(n) * (t ** 2) / result1)
+    return str(result2)
 
 if __name__ == '__main__':
     whole_percep(5)
