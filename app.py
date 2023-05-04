@@ -31,7 +31,7 @@ controls = dbc.Card(
                     min_date_allowed=datetime(2020, 3, 1),
                     max_date_allowed=datetime.now(),
                     start_date=datetime(2020, 3, 1),
-                    end_date = datetime.now()
+                    end_date = datetime(2023, 3, 1),
                 ),
                 html.Br(),
                 dbc.Alert(id='query_date_div', is_open=False,),
@@ -311,12 +311,12 @@ def render_blotter(n_clicks, alpha1, n1, alpha2, n2, n3, asset_id):
     entry = helper.generateOrders(float(alpha1), int(n1), float(alpha2), int(n2), ivv_prc, asset_id)
     ledger = helper.generateLedger(entry)
     ledger2 = percepto.whole_percep(int(n3))
-    # ledger2.drop(columns='Unnamed',inplace=True)
+    # ledger2.drop('Unnamed', axis=1, inplace=True)
     innerJoinRtn(ledger2)
     return entry.to_dict('records'), ledger.to_dict('records'), ledger2.to_dict('records')
 
 def innerJoinRtn(ledger2):
-    # generate IVV rtn
+    # generate IVV rtn for smart ledger
     print("try inner join")
     global ivv_benchmark
     global filtered_ledger2
@@ -385,7 +385,7 @@ def render_smart_plot(slider_range, n_clicks):
 def dumb_innerJoinRtn():
     # generate IVV rtn
     print("try inner join")
-    ivv_data= pd.DataFrame(columns=['dt_enter', 'dt_exit', 'rtn_benchmark'])
+    ivv_data = pd.DataFrame(columns=['dt_enter', 'dt_exit', 'rtn_benchmark'])
     ivv = helper.query_date(start_date_string, end_date_string, 'IVV')
     for index, row in ledger.iterrows():
         enter_date = row['dt_enter']
@@ -424,6 +424,7 @@ def render_dumb_plot(slider_range, n_clicks):
         df.at[index, 'rtn'] = float(row['rtn'].replace('%', 'e-2'))
         df.at[index, 'rtn_benchmark'] = float(row['rtn_benchmark'].replace('%', 'e-2'))
 
+    print(df)
     fig = px.scatter(
         df,
         x=df.columns[1],
