@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.linear_model import Perceptron
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
+import math
 
 # n3 is the lookback window size
 def whole_percep(n3):
@@ -96,7 +97,13 @@ def single_percep(date_str, lookback_window, ledger, features):
     # print(float(str(y_pred)[3:-2]))
     return str(y_pred)[3:-2]
 
-
+# a is the upper bound of alpha, which is the input from user
+# b is the stop gap, we exit the trade no matter what if it's down by 10%
+def hoeffding_cal(n, alpha_dumb, alpha_smart, a, b = -0.1):
+    t = alpha_dumb - alpha_smart
+    result1 = math.exp(-2 * n * (t ** 2))
+    result2 = (b - a) ** 2
+    return result1 / result2
 
 if __name__ == '__main__':
     whole_percep(5)
