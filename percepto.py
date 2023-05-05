@@ -8,6 +8,12 @@ import math
 def whole_percep(n3):
     ledger = pd.read_csv('ledger_queried.csv')
     features = pd.read_csv('hw4_data.csv')
+    # features preprocessing
+    # Dates,IVV US Equity,IVV AU Equity,ECRPUS 1Y Index,SPXSFRCS Index,FDTRFTRL Index,USCRWTIC Index,XAU Curncy,JPYUSD Curncy,DXY Curncy,VIX Index
+    features.drop(["IVV AU Equity", "USCRWTIC Index", "JPYUSD Curncy", "VIX Index", "ECRPUS 1Y Index"], axis=1, inplace=True)
+    features.drop(["DXY Curncy"], axis=1,
+                  inplace=True)
+
     num_rows = len(ledger)
     ledger.insert(len(ledger.columns), "predict_success", "")
     for n in range(n3, num_rows):
@@ -18,7 +24,6 @@ def whole_percep(n3):
     print(ledger)
     ledger.to_csv("predict_ledger_output.csv", index = False)
     return ledger
-
 
 def single_percep(date_str, lookback_window, ledger, features):
     # the format of the date_str should be like "2021-05-8"
@@ -38,7 +43,7 @@ def single_percep(date_str, lookback_window, ledger, features):
     # print("ledger->" + row_ledger['dt_enter'])
     # print("feature->" + row_feature['Dates'])
     if row_ledger.empty or row_feature.empty:
-        print("didn't find the matched record from data ")
+        # print("didn't find the matched record from data ")
         return ""
 
     if row_ledger.index[0] == len(ledger) - 1 or row_feature.index[0] == len(features) - 1:
@@ -84,9 +89,9 @@ def single_percep(date_str, lookback_window, ledger, features):
     try:
         ppn.fit(X_std, y)
     except ValueError:
-        print("fitting:")
-        print(X_std)
-        print(y)
+        # print("fitting n:")
+        # print(X_std)
+        # print(y)
         return ""
 
     y_pred = ppn.predict(x_test_std)
@@ -101,9 +106,9 @@ def single_percep(date_str, lookback_window, ledger, features):
 # b is the stop gap, we exit the trade no matter what if it's down by 10%
 def hoeffding_cal(n, alpha_dumb, alpha_smart, a, b = -0.1):
     t = float(alpha_dumb) - float(alpha_smart)
-    result1 = math.exp(-2 * float(n) * (t ** 2))
-    result2 = (float(b) - float(a)) ** 2
-    return result1 / result2
+    result1 = (float(b) - float(a)) ** 2
+    result2 = math.exp(-2 * float(n) * (t ** 2) / result1)
+    return str(result2)
 
-if __name__ == '__main__':
-    whole_percep(5)
+# if __name__ == '__main__':
+#     whole_percep(5)
